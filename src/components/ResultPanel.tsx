@@ -29,16 +29,16 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
 
   const modeLabel: Record<PracticeMode, string> = {
     split: '分割練習',
-    keywords: '重要語句',
     memorize: '全暗記挑戦',
   };
+  const modeName = record.mode === 'keywords' ? '過去のモード' : modeLabel[record.mode];
 
   return (
     <div className="w-full max-w-2xl mx-auto py-8 border-t border-b border-[#E5E2DC] dark:border-neutral-800">
       <div className="flex flex-wrap items-baseline justify-between gap-2 mb-6">
         <div>
           <p className="text-xs text-[#6B6760] dark:text-neutral-400">
-            {modeLabel[record.mode]} · {record.targetTitle}
+            {modeName} · {record.targetTitle}
           </p>
           <h2 className="font-mincho text-2xl font-semibold text-[#1A1917] dark:text-[#EFECE6] mt-1">
             打鍵完了 — {rank.label}

@@ -14,14 +14,6 @@ export interface PreambleSection {
   tokens: PreambleToken[];
 }
 
-export interface KeyWordItem {
-  id: string;
-  display: string;
-  reading: string;
-  meaning: string;
-  sectionId: string;
-}
-
 export const PREAMBLE_SECTIONS: PreambleSection[] = [
   {
     id: 'sec-1',
@@ -375,37 +367,6 @@ export const PREAMBLE_SECTIONS: PreambleSection[] = [
       { display: '誓ふ。', reading: 'ちかふ。', modernDisplay: '誓う。', modernReading: 'ちかう。' },
     ],
   },
-];
-
-export const KEY_WORDS: KeyWordItem[] = [
-  { id: 'kw-1', display: '日本国民', reading: 'にほんこくみん', meaning: '主権の主体である日本国の国民', sectionId: 'sec-1' },
-  { id: 'kw-2', display: '正当に選挙された', reading: 'せいとうにせんきょされた', meaning: '適法かつ公正な手続きで選ばれた', sectionId: 'sec-1' },
-  { id: 'kw-3', display: '代表者', reading: 'だいひょうしゃ', meaning: '国民の信託を受けて国政を担う者', sectionId: 'sec-1' },
-  { id: 'kw-4', display: '諸国民との協和', reading: 'しょこくみんとのきょうわ', meaning: '世界の国々の人々との協調と融和', sectionId: 'sec-1' },
-  { id: 'kw-5', display: '自由のもたらす恵沢', reading: 'じゆうのもたらすけいたく', meaning: '自由によって得られる豊かな恩恵', sectionId: 'sec-1' },
-  { id: 'kw-6', display: '政府の行為', reading: 'せいふのこうい', meaning: '国家権力による政策や行動', sectionId: 'sec-1' },
-  { id: 'kw-7', display: '戦争の惨禍', reading: 'せんそうのさんか', meaning: '戦争がもたらす悲惨な災い', sectionId: 'sec-1' },
-  { id: 'kw-8', display: '主権が国民に存する', reading: 'しゅけんがこくみんにそんする', meaning: '国のあり方を最終的に決める権力が国民にあること', sectionId: 'sec-1' },
-  { id: 'kw-9', display: '厳粛な信託', reading: 'げんしゅくなしんたく', meaning: '国民が代表者に託す重みある信頼', sectionId: 'sec-2' },
-  { id: 'kw-10', display: '権威と権力と福利', reading: 'けんいとけんりょくとふくり', meaning: 'リンカーンの「人民の・による・ための政治」の理念', sectionId: 'sec-2' },
-  { id: 'kw-11', display: '享受する', reading: 'きょうじゅする', meaning: '利益や権利を受け入れて味わうこと', sectionId: 'sec-2' },
-  { id: 'kw-12', display: '人類普遍の原理', reading: 'じんるいふへんのげんり', meaning: '時代や国境を超えてすべての人類に通じる道理', sectionId: 'sec-3' },
-  { id: 'kw-13', display: '憲法、法令及び詔勅', reading: 'けんぽう、ほうれいおよびしょうちょく', meaning: '大日本帝国憲法下の法規範および天皇の勅命', sectionId: 'sec-3' },
-  { id: 'kw-14', display: '排除する', reading: 'はいじょする', meaning: '取り除いて認めないこと', sectionId: 'sec-3' },
-  { id: 'kw-15', display: '恒久の平和', reading: 'こうきゅうのへいわ', meaning: '一時的ではなく永続する平和', sectionId: 'sec-4' },
-  { id: 'kw-16', display: '崇高な理想', reading: 'すうこうなりそう', meaning: '気高く尊い理想', sectionId: 'sec-4' },
-  { id: 'kw-17', display: '公正と信義', reading: 'こうせいとしんぎ', meaning: '公平で正しく、約束と信頼を重んじる姿勢', sectionId: 'sec-4' },
-  { id: 'kw-18', display: '安全と生存を保持', reading: 'あんぜんとせいぞんをほじ', meaning: '平和主義のもとで国の安全と暮らしを守ること', sectionId: 'sec-4' },
-  { id: 'kw-19', display: '専制と隷従', reading: 'せんせいとれいじゅう', meaning: '独裁的な支配とそれに屈従する状態', sectionId: 'sec-5' },
-  { id: 'kw-20', display: '圧迫と偏狭', reading: 'あっぱくとへんきょう', meaning: '力による抑圧と心の狭い排他主義', sectionId: 'sec-5' },
-  { id: 'kw-21', display: '名誉ある地位', reading: 'めいよあるちい', meaning: '国際社会から信頼され尊敬される立場', sectionId: 'sec-5' },
-  { id: 'kw-22', display: '恐怖と欠乏', reading: 'きょうふとけつぼう', meaning: '戦争の恐れや物質的・経済的困窮', sectionId: 'sec-6' },
-  { id: 'kw-23', display: '平和のうちに生存する権利', reading: 'へいわのうちにせいぞんするけんり', meaning: '平和的生存権', sectionId: 'sec-6' },
-  { id: 'kw-24', display: '政治道徳の法則', reading: 'せいじどうとくのほうそく', meaning: '国際政治において各国が守るべき普遍的規範', sectionId: 'sec-7' },
-  { id: 'kw-25', display: '自国の主権を維持', reading: 'じこくのしゅけんをいじ', meaning: '国家としての独立と自主性を保つこと', sectionId: 'sec-7' },
-  { id: 'kw-26', display: '対等関係', reading: 'たいとうかんけい', meaning: '優劣のない平等な国際関係', sectionId: 'sec-7' },
-  { id: 'kw-27', display: '各国の責務', reading: 'かっこくのせきむ', meaning: 'すべての国が果たすべき義務と責任', sectionId: 'sec-7' },
-  { id: 'kw-28', display: '国家の名誉にかけ', reading: 'こっかのめいよにかけ', meaning: '国の誇りと威信を懸けて誓う結びの言葉', sectionId: 'sec-8' },
 ];
 
 export function resolveToken(token: PreambleToken, style: 'original' | 'modern'): { display: string; reading: string } {

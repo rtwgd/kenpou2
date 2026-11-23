@@ -1,7 +1,7 @@
 import React from 'react';
 import { Moon, Sun } from 'lucide-react';
 
-export type ActiveTab = 'split' | 'keywords' | 'memorize' | 'analytics';
+export type ActiveTab = 'split' | 'memorize' | 'analytics';
 
 interface HeaderProps {
   activeTab: ActiveTab;
@@ -12,7 +12,6 @@ interface HeaderProps {
 
 const NAV_ITEMS: { id: ActiveTab; label: string }[] = [
   { id: 'split', label: '分割練習' },
-  { id: 'keywords', label: '重要語句' },
   { id: 'memorize', label: '全暗記挑戦' },
   { id: 'analytics', label: '学習グラフ' },
 ];

@@ -1,10 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Eye, HelpCircle, RotateCcw, Volume2, VolumeX } from 'lucide-react';
 import {
-  KEY_WORDS,
   PREAMBLE_SECTIONS,
   PreambleToken,
-  resolveToken,
 } from '../data/preamble';
 import {
   createTypingState,
@@ -36,7 +34,6 @@ interface PracticeViewProps {
   initialSectionId?: string;
 }
 
-type KeywordPoolId = 'all' | 'random10' | 'p1' | 'p2' | 'p34';
 type MemorizeScopeId = 'all' | 'p1' | 'p2' | 'p3' | 'p4';
 
 export const PracticeView: React.FC<PracticeViewProps> = ({
@@ -59,11 +56,6 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
       setSelectedSplitId(initialSectionId);
     }
   }, [initialSectionId]);
-
-  // Keyword mode selection
-  const [keywordPool, setKeywordPool] = useState<KeywordPoolId>('random10');
-  const [keywordSeed, setKeywordSeed] = useState<number>(1);
-  const [keywordIndex, setKeywordIndex] = useState<number>(0);
 
   // Memorize mode selection
   const [memorizeScope, setMemorizeScope] = useState<MemorizeScopeId>('p1');
@@ -100,31 +92,6 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
   const hintsUsedRef = useRef<number>(0);
   const activeTokenElRef = useRef<HTMLSpanElement | null>(null);
 
-  // Build keyword list for current pool
-  const activeKeywordList = useMemo(() => {
-    if (keywordPool === 'p1') {
-      return KEY_WORDS.filter((w) => ['sec-1', 'sec-2', 'sec-3'].includes(w.sectionId));
-    }
-    if (keywordPool === 'p2') {
-      return KEY_WORDS.filter((w) => ['sec-4', 'sec-5', 'sec-6'].includes(w.sectionId));
-    }
-    if (keywordPool === 'p34') {
-      return KEY_WORDS.filter((w) => ['sec-7', 'sec-8'].includes(w.sectionId));
-    }
-    if (keywordPool === 'random10') {
-      // Deterministic shuffle per seed
-      const copy = [...KEY_WORDS];
-      let s = keywordSeed * 9301 + 49297;
-      for (let i = copy.length - 1; i > 0; i--) {
-        s = (s * 9301 + 49297) % 233280;
-        const j = Math.floor((s / 233280) * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy.slice(0, 10);
-    }
-    return KEY_WORDS;
-  }, [keywordPool, keywordSeed]);
-
   // Build active tokens & target metadata
   const currentTarget = useMemo((): {
     id: string;
@@ -147,23 +114,6 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
         title: sec.title,
         subtitle: sec.summary,
         tokens: sec.tokens,
-      };
-    }
-
-    if (mode === 'keywords') {
-      const word = activeKeywordList[keywordIndex] ?? activeKeywordList[0];
-      const poolTitles: Record<KeywordPoolId, string> = {
-        all: '重要語句（全28語）',
-        random10: '重要語句（ランダム10問）',
-        p1: '重要語句（第一段落）',
-        p2: '重要語句（第二段落）',
-        p34: '重要語句（第三・四段落）',
-      };
-      return {
-        id: `kw-${keywordPool}`,
-        title: poolTitles[keywordPool],
-        subtitle: word.meaning,
-        tokens: [{ display: word.display, reading: word.reading }],
       };
     }
 
@@ -190,20 +140,12 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
       subtitle: `${secs.map((s) => s.title).join(' / ')}`,
       tokens: secs.flatMap((s) => s.tokens),
     };
-  }, [mode, selectedSplitId, activeKeywordList, keywordIndex, keywordPool, memorizeScope]);
+  }, [mode, selectedSplitId, memorizeScope]);
 
   // Reset typing state cleanly
   const resetSession = useCallback(
-    (resetKeywordSequence = true) => {
-      if (mode === 'keywords' && resetKeywordSequence) {
-        setKeywordIndex(0);
-      }
-      const nextTokens =
-        mode === 'keywords' && resetKeywordSequence
-          ? [{ display: activeKeywordList[0].display, reading: activeKeywordList[0].reading }]
-          : currentTarget.tokens;
-
-      setTypingState(createTypingState(nextTokens, prefs.textStyle));
+    () => {
+      setTypingState(createTypingState(currentTarget.tokens, prefs.textStyle));
       setStarted(false);
       setElapsedMs(0);
       setCorrectKeys(0);
@@ -224,12 +166,11 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
       errorKeysRef.current = 0;
       hintsUsedRef.current = 0;
     },
-    [mode, activeKeywordList, currentTarget.tokens, prefs.textStyle]
+    [currentTarget.tokens, prefs.textStyle]
   );
 
   // Reset whenever target, mode, or textStyle changes
   useEffect(() => {
-    setKeywordIndex(0);
     setTypingState(createTypingState(currentTarget.tokens, prefs.textStyle));
     setStarted(false);
     setElapsedMs(0);
@@ -250,7 +191,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
     correctKeysRef.current = 0;
     errorKeysRef.current = 0;
     hintsUsedRef.current = 0;
-  }, [mode, selectedSplitId, keywordPool, keywordSeed, memorizeScope, prefs.textStyle]);
+  }, [mode, selectedSplitId, memorizeScope, prefs.textStyle]);
 
   // Live timer loop while active
   useEffect(() => {
@@ -306,7 +247,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
     [mode, currentTarget.id, currentTarget.title, prefs.textStyle, prefs.soundEnabled, onRecordSession]
   );
 
-  // Advance to next section / reshuffle keywords
+  // Advance to the next section or memorization scope
   const handleNext = useCallback(() => {
     if (mode === 'split') {
       const idx = PREAMBLE_SECTIONS.findIndex((s) => s.id === selectedSplitId);
@@ -319,24 +260,16 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
       }
       return;
     }
-    if (mode === 'keywords') {
-      if (keywordPool === 'random10') {
-        setKeywordSeed((s) => s + 1);
-      } else {
-        resetSession(true);
-      }
-      return;
-    }
     if (mode === 'memorize') {
       const order: MemorizeScopeId[] = ['p1', 'p2', 'p3', 'p4', 'all'];
       const idx = order.indexOf(memorizeScope);
       if (idx >= 0 && idx + 1 < order.length) {
         setMemorizeScope(order[idx + 1]);
       } else {
-        resetSession(true);
+        resetSession();
       }
     }
-  }, [mode, selectedSplitId, keywordPool, memorizeScope, resetSession]);
+  }, [mode, selectedSplitId, memorizeScope, resetSession]);
 
   // Reveal hint in memorize mode
   const handleMemorizeHint = useCallback(() => {
@@ -366,7 +299,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
 
       if (e.key === 'Escape') {
         e.preventDefault();
-        resetSession(true);
+        resetSession();
         return;
       }
 
@@ -434,23 +367,10 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
         setTypingState(result.nextState);
 
         if (result.nextState.finished) {
-          // In keyword mode, seamlessly chain through the active list!
-          if (mode === 'keywords' && keywordIndex + 1 < activeKeywordList.length) {
-            const nextIdx = keywordIndex + 1;
-            const nextWord = activeKeywordList[nextIdx];
-            setKeywordIndex(nextIdx);
-            setTypingState(
-              createTypingState(
-                [{ display: nextWord.display, reading: nextWord.reading }],
-                prefs.textStyle
-              )
-            );
-          } else {
-            const finalMs =
-              startTimeRef.current !== null ? performance.now() - startTimeRef.current : 500;
-            setElapsedMs(finalMs);
-            finalizeSession(finalMs, correctKeysRef.current, errorKeysRef.current);
-          }
+          const finalMs =
+            startTimeRef.current !== null ? performance.now() - startTimeRef.current : 500;
+          setElapsedMs(finalMs);
+          finalizeSession(finalMs, correctKeysRef.current, errorKeysRef.current);
         }
       } else {
         // Typo
@@ -468,7 +388,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
 
         if (prefs.strictMode) {
           // Sudden death mode: reset immediately on mistake
-          resetSession(true);
+          resetSession();
         }
       }
     };
@@ -481,8 +401,6 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
     completedRecord,
     gaveUp,
     mode,
-    keywordIndex,
-    activeKeywordList,
     prefs.soundEnabled,
     prefs.strictMode,
     prefs.textStyle,
@@ -538,11 +456,8 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
   const progressRatio =
     typingState.units.length > 0 ? typingState.unitIndex / typingState.units.length : 0;
   const estimatedTotalKeys = useMemo(() => {
-    if (mode === 'keywords') {
-      return activeKeywordList.reduce((acc, w) => acc + w.reading.length * 1.8, 0);
-    }
     return Math.max(1, typingState.units.length * 1.8);
-  }, [mode, activeKeywordList, typingState.units.length]);
+  }, [typingState.units.length]);
 
   const paceRatio =
     prefs.paceTargetKpm > 0 && started
@@ -559,7 +474,6 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
       if (idx === PREAMBLE_SECTIONS.length - 1) return '全文通しへ';
       return '第1節へ';
     }
-    if (mode === 'keywords') return '次の10問へ';
     return '次の段落へ';
   }, [mode, selectedSplitId]);
 
@@ -622,41 +536,6 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
                   </span>
                 ) : null}
               </button>
-            </div>
-          </div>
-        )}
-
-        {mode === 'keywords' && (
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E5E2DC] dark:border-neutral-800 pb-3">
-            <div className="flex flex-wrap items-center gap-1.5">
-              {(
-                [
-                  { id: 'random10', label: 'ランダム10問' },
-                  { id: 'all', label: '全28語' },
-                  { id: 'p1', label: '第一段落' },
-                  { id: 'p2', label: '第二段落' },
-                  { id: 'p34', label: '第三・四段落' },
-                ] as { id: KeywordPoolId; label: string }[]
-              ).map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => {
-                    setKeywordPool(item.id);
-                    if (item.id === 'random10') setKeywordSeed((s) => s + 1);
-                  }}
-                  className={`px-3 py-1.5 text-xs sm:text-sm rounded transition-colors whitespace-nowrap shrink-0 ${
-                    keywordPool === item.id
-                      ? 'bg-[#1D3557] text-white dark:bg-[#EFECE6] dark:text-[#141413] font-medium'
-                      : 'text-[#4A4742] dark:text-neutral-400 hover:bg-[#EFECE6] dark:hover:bg-neutral-800'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-            <div className="font-mono-tabular text-xs text-[#6B6760] dark:text-neutral-400">
-              {keywordIndex + 1} / {activeKeywordList.length} 問
             </div>
           </div>
         )}
@@ -846,7 +725,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
           sessionMissedKeys={sessionMissedKeys}
           hasNext={true}
           nextLabel={nextButtonLabel}
-          onRetry={() => resetSession(true)}
+          onRetry={resetSession}
           onNext={handleNext}
           onViewAnalytics={onGoAnalytics}
         />
@@ -858,11 +737,9 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
               <h1 className="font-mincho text-lg sm:text-xl font-semibold text-[#1A1917] dark:text-[#EFECE6]">
                 {currentTarget.title}
               </h1>
-              {mode !== 'keywords' && (
-                <p className="text-xs text-[#6B6760] dark:text-neutral-400 mt-0.5">
-                  {currentTarget.subtitle}
-                </p>
-              )}
+              <p className="text-xs text-[#6B6760] dark:text-neutral-400 mt-0.5">
+                {currentTarget.subtitle}
+              </p>
             </div>
 
             <div className="flex items-baseline gap-5 font-mono-tabular">
@@ -955,22 +832,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
           )}
 
           {/* MAIN TYPING STAGE */}
-          {mode === 'keywords' ? (
-            /* Key Vocabulary Focused Stage */
-            <div className="py-10 sm:py-14 text-center">
-              <div className="font-mincho text-3xl sm:text-5xl font-medium tracking-wider text-[#1A1917] dark:text-[#EFECE6] mb-4">
-                {resolveToken(currentTarget.tokens[0], prefs.textStyle).display}
-              </div>
-              <p className="text-sm sm:text-base text-[#6B6760] dark:text-neutral-400 max-w-lg mx-auto leading-relaxed">
-                {currentTarget.subtitle}
-              </p>
-              {!started && (
-                <p className="mt-8 text-xs text-[#8C877E] dark:text-neutral-500">
-                  最初のキーを押すと計測が始まります（Esc でリセット）
-                </p>
-              )}
-            </div>
-          ) : mode === 'memorize' ? (
+          {mode === 'memorize' ? (
             /* Memorization Challenge Manuscript */
             <div>
               <div className="flex flex-wrap items-center justify-between gap-3 mb-4 text-xs text-[#6B6760] dark:text-neutral-400">
@@ -1148,7 +1010,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
 
             <button
               type="button"
-              onClick={() => resetSession(true)}
+              onClick={resetSession}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-[#DFDCD5] dark:border-neutral-700 text-[#4A4742] dark:text-neutral-300 hover:bg-[#EFECE6] dark:hover:bg-neutral-800 transition-colors whitespace-nowrap"
             >
               <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />

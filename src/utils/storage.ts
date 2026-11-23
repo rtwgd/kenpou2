@@ -1,9 +1,10 @@
-export type PracticeMode = 'split' | 'keywords' | 'memorize';
+export type PracticeMode = 'split' | 'memorize';
+type StoredPracticeMode = PracticeMode | 'keywords';
 
 export interface TypingSessionRecord {
   id: string;
   timestamp: number;
-  mode: PracticeMode;
+  mode: StoredPracticeMode;
   targetId: string;
   targetTitle: string;
   kpm: number;

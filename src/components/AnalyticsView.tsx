@@ -167,7 +167,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
           学習グラフと記録
         </h1>
         <p className="text-sm text-[#6B6760] dark:text-neutral-400 mt-3 max-w-md mx-auto leading-relaxed">
-          まだ完了した練習記録がありません。分割練習・重要語句・全暗記のいずれかを1回完了すると、打鍵速度（KPM）と正確率の推移、苦手キーの分析がここに表示されます。
+          まだ完了した練習記録がありません。分割練習または全暗記を1回完了すると、打鍵速度（KPM）と正確率の推移、苦手キーの分析がここに表示されます。
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <button
@@ -176,13 +176,6 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
             className="px-5 py-2.5 text-sm font-medium rounded bg-[#1D3557] text-white hover:bg-[#162944] dark:bg-[#EFECE6] dark:text-[#141413] transition-colors"
           >
             分割練習をはじめる
-          </button>
-          <button
-            type="button"
-            onClick={() => onStartPractice('keywords')}
-            className="px-5 py-2.5 text-sm font-medium rounded border border-[#DFDCD5] dark:border-neutral-700 text-[#1A1917] dark:text-neutral-200 hover:bg-[#EFECE6] dark:hover:bg-neutral-800 transition-colors"
-          >
-            重要語句を練習する
           </button>
         </div>
       </div>
@@ -195,7 +188,6 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
 
   const modeNames: Record<PracticeMode, string> = {
     split: '分割練習',
-    keywords: '重要語句',
     memorize: '全暗記',
   };
 
@@ -277,7 +269,6 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
               [
                 { id: 'all', label: 'すべて' },
                 { id: 'split', label: '分割練習' },
-                { id: 'keywords', label: '重要語句' },
                 { id: 'memorize', label: '全暗記' },
               ] as { id: ModeFilter; label: string }[]
             ).map((item) => (
@@ -657,7 +648,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
                       })}
                     </td>
                     <td className="py-2.5 pr-4 whitespace-nowrap text-xs text-[#6B6760] dark:text-neutral-400">
-                      {modeNames[s.mode]}
+                      {s.mode === 'keywords' ? '過去のモード' : modeNames[s.mode]}
                     </td>
                     <td className="py-2.5 pr-4 truncate max-w-[220px]">{s.targetTitle}</td>
                     <td className="py-2.5 pr-4 font-mono-tabular font-semibold text-right text-[#1D3557] dark:text-[#EFECE6]">

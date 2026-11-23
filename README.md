@@ -1,19 +1,18 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# 憲法前文打鍵
 
-# Run and deploy your AI Studio app
+日本国憲法前文の分割練習・全暗記に対応したタイピング練習サイトです。練習記録はブラウザー内に保存されます。
 
-This contains everything you need to run your app locally.
+## ローカルで実行
 
+必要環境: Node.js 22 以降
 
-## Run Locally
+```sh
+npm install
+npm run dev
+```
 
-**Prerequisites:**  Node.js
+## GitHub Pages で公開
 
+`main` ブランチへの push、または Actions の `Deploy to GitHub Pages` ワークフローを手動実行すると、GitHub Pages にビルドを公開します。
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+リポジトリの **Settings → Pages → Build and deployment → Source** が **GitHub Actions** になっていることを確認してください。公開 URL は `https://<ユーザー名>.github.io/kenpou2/` です。
