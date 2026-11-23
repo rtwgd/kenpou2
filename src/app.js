@@ -19,6 +19,7 @@ import {
 
 const app = document.querySelector('#app');
 const allTokens = PREAMBLE_SECTIONS.flatMap((section) => section.tokens);
+let stageScrollTop = 0;
 const state = {
   mode: 'split',
   sectionId: 'sec-1',
@@ -74,6 +75,7 @@ function currentTarget() {
 
 function resetSession() {
   state.typing = createTypingState(currentTarget().tokens, state.prefs.textStyle);
+  stageScrollTop = 0;
   state.startedAt = null;
   state.elapsedMs = 0;
   state.correct = 0;
@@ -100,7 +102,7 @@ function applyPreferences(patch) {
 function applyTheme() {
   document.documentElement.classList.toggle('dark', state.prefs.theme === 'dark');
   document.querySelector('meta[name="theme-color"]')?.setAttribute(
-    'content', state.prefs.theme === 'dark' ? '#171b21' : '#f7f8fa',
+    'content', state.prefs.theme === 'dark' ? '#181c19' : '#f6f7f4',
   );
 }
 
@@ -274,11 +276,12 @@ function renderPractice() {
       <button class="choice-button" type="button" data-mode="split" aria-pressed="${state.mode === 'split'}">分割練習</button>
       <button class="choice-button" type="button" data-mode="memorize" aria-pressed="${state.mode === 'memorize'}">全暗記挑戦</button>
     </div>
-    ${state.mode === 'split' ? `<div class="section-choices" aria-label="練習する節">${getSectionChoices()}</div>`
-      : `<div class="mode-picker" aria-label="暗記する範囲">${[
+    ${state.mode === 'split' ? `<div class="section-picker"><p class="control-label">練習する範囲</p>
+      <div class="section-choices" aria-label="練習する節">${getSectionChoices()}</div></div>`
+      : `<div class="scope-picker"><p class="control-label">暗記する範囲</p><div class="mode-picker" aria-label="暗記する範囲">${[
         ['p1', '第一段落'], ['p2', '第二段落'], ['p3', '第三段落'], ['p4', '第四段落'], ['all', '前文すべて'],
       ].map(([id, label]) => `<button class="choice-button" type="button" data-scope="${id}" aria-pressed="${state.memorizeScope === id}">${label}</button>`).join('')}
-      <button class="choice-button" type="button" data-action="hint-style">${state.memorizeHintMode === 'blank' ? '完全白紙' : '頭文字あり'}</button></div>`}
+      <button class="choice-button" type="button" data-action="hint-style">${state.memorizeHintMode === 'blank' ? '完全白紙' : '頭文字あり'}</button></div></div>`}
     ${renderSettings()}
     ${state.imeWarning ? '<div class="alert" role="alert">日本語入力（IME）が有効です。「半角/全角」または「英数」キーで半角英数に切り替えてください。</div>' : ''}
     ${state.completed ? renderResult() : `<section class="surface practice-card">
@@ -388,6 +391,8 @@ function renderAnalytics() {
 
 function render() {
   applyTheme();
+  const previousStage = app.querySelector('.text-stage');
+  if (state.startedAt && previousStage) stageScrollTop = previousStage.scrollTop;
   const isAnalytics = state.mode === 'analytics';
   app.innerHTML = `<div class="shell">
     <header class="topbar"><div class="topbar-inner">
@@ -405,6 +410,21 @@ function render() {
       <span>Esc やり直し · Enter 次へ · F1 暗記ヒント</span>
     </div></footer>
   </div>`;
+
+  const stage = app.querySelector('.text-stage');
+  if (!stage) return;
+  stage.scrollTop = stageScrollTop;
+  if (!state.startedAt || state.completed) return;
+
+  const activeToken = stage.querySelector('[data-active-token]');
+  if (!activeToken) return;
+  const lineHeight = Number.parseFloat(getComputedStyle(stage).lineHeight);
+  const stageRect = stage.getBoundingClientRect();
+  const activeTop = activeToken.getBoundingClientRect().top - stageRect.top + stage.scrollTop;
+  if (activeTop - stage.scrollTop > lineHeight * 2.5) {
+    stageScrollTop = activeTop - lineHeight * 1.5;
+    stage.scrollTo({ top: stageScrollTop, behavior: 'smooth' });
+  }
 }
 
 function nextTarget() {
