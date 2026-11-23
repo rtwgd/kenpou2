@@ -17,6 +17,6 @@ npm run dev
 
 ## GitHub Pages で公開
 
-`main` ブランチへの push、または Actions の `Deploy to GitHub Pages` ワークフローを手動実行すると、GitHub Pages にビルドを公開します。
+`main` ブランチへの push、または Actions の `Deploy to GitHub Pages` ワークフローを手動実行すると、GitHub Pages にビルドを公開します。ビルド版を公開する場合は、Pages の公開元を **GitHub Actions** にしてください。
 
-リポジトリの **Settings → Pages → Build and deployment → Source** が **GitHub Actions** になっていることを確認してください。公開 URL は `https://<ユーザー名>.github.io/kenpou2/` です。
+**Deploy from a branch** を使う場合は、ブランチを `main`、フォルダーを `/(root)` に設定してください。公開 URL は `https://<ユーザー名>.github.io/kenpou2/` です。
