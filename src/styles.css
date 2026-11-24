@@ -221,11 +221,10 @@ h3 { margin-bottom: 4px; font-size: 13px; }
   padding: 12px 8px 18px 2px;
   font: 400 clamp(21px, 3vw, 26px)/2.05 var(--serif);
   letter-spacing: .025em;
-  scrollbar-color: var(--line) transparent;
-  scrollbar-width: thin;
-  scroll-behavior: smooth;
+  scrollbar-width: none;
   overscroll-behavior: contain;
 }
+.text-stage::-webkit-scrollbar { display: none; }
 .text-token { border-radius: 3px; }
 .text-token.done { color: var(--ink); }
 .text-token.current { border-bottom: 2px solid var(--accent); background: var(--accent-soft); color: var(--accent); }

@@ -420,10 +420,10 @@ function render() {
   if (!activeToken) return;
   const lineHeight = Number.parseFloat(getComputedStyle(stage).lineHeight);
   const stageRect = stage.getBoundingClientRect();
-  const activeTop = activeToken.getBoundingClientRect().top - stageRect.top + stage.scrollTop;
-  if (activeTop - stage.scrollTop > lineHeight * 2.5) {
-    stageScrollTop = activeTop - lineHeight * 1.5;
-    stage.scrollTo({ top: stageScrollTop, behavior: 'smooth' });
+  const activeBottom = activeToken.getBoundingClientRect().bottom - stageRect.top + stage.scrollTop;
+  if (activeBottom > stage.scrollTop + stage.clientHeight - lineHeight) {
+    stageScrollTop = activeBottom - stage.clientHeight + lineHeight * 1.5;
+    stage.scrollTop = stageScrollTop;
   }
 }
 
